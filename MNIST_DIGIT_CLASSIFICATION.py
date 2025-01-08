@@ -12,103 +12,96 @@ from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.datasets import mnist
-
 from tensorflow.math import confusion_matrix
 
-"""so when we import mnit dataset we need not t convert it to numpy array we get numpy array ie already processed data also we get """
+# The MNIST dataset is already pre-processed and returned as numpy arrays, so we don't need to convert it.
 
-"""creating four arrays which are given to us"""
-(X_train,Y_train),(X_test,Y_test)=mnist.load_data()
+# Load the dataset
+(X_train, Y_train), (X_test, Y_test) = mnist.load_data()
 print(type(X_train))
 
+# Display the shape of the numpy arrays
+print((X_train.shape, Y_train.shape, X_test.shape, Y_test.shape))
 
-#shape of numpy array
-print((X_train.shape,Y_train.shape,X_test.shape,Y_test.shape))
-
-#printint the 11 th image or in 10 th index
-# print(X_train[0])
-print(X_train.shape)#28X28
-plt.imshow(X_train[0])#for creating visualisation using pyplot
-#the image is grayscale but we seeeingit coloured so we can use,cmap="gray"
-
+# Visualizing the first image in the training set
+plt.imshow(X_train[0], cmap='gray')  # The image is grayscale, so we use cmap='gray'
 plt.show()
 
-#printing the lable for 50 index image
-print(Y_train[00])
-print(type(Y_train))#it is also numpy
+# Print the label for the 0th image
+print(Y_train[0])
+print(type(Y_train))  # It is also a numpy array
 print(Y_train)
 
+# Display the shapes of the label arrays
+print(Y_train.shape, Y_test.shape)
 
-#image lables
-print(Y_train.shape,Y_test.shape)
-
+# Display the unique values in the test and training labels
 print(numpy.unique(Y_test))
 print(numpy.unique(Y_train))
 print(numpy.unique(X_test))
-
 print(numpy.unique(X_train))
-#scaling the values to lower level
-X_train=X_train/255
-X_test=X_test/255
+
+# Scale the pixel values to a range of 0-1
+X_train = X_train / 255
+X_test = X_test / 255
 print(numpy.unique(X_test))
 print(numpy.unique(X_test)) 
 
+# BUILDING THE NEURAL NETWORK
 
-"""BUILDING NEURAL NETWORK"""
-#SETTING UP THE LAYERS OF NEURAL NETWORK
-model=keras.Sequential([keras.layers.Flatten(input_shape=(28,28)),keras.layers.Dense(50,activation='relu'), keras.layers.Dense(50,activation='relu'),keras.layers.Dense(10,activation='sigmoid')])
+# Setting up the layers of the neural network
+model = keras.Sequential([
+    keras.layers.Flatten(input_shape=(28, 28)),
+    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(10, activation='sigmoid')
+])
 
-#compiling the neural network using model
-model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+# Compiling the model
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
-#training the neurall network
+# Training the neural network
+model.fit(X_train, Y_train, epochs=10)
 
-model.fit(X_train,Y_train,epochs=10)
+# Training accuracy is 99.0%
 
-#training data accuracy is 99.0%
+# Evaluate the model on test data
+# loss, accuracy = model.evaluate(X_test, Y_test)
+# print(accuracy)
+# Test accuracy is 96.6%
 
-# #ACCURACY ON TEST DATA
-
-#loss,accuracy=model.evaluate(X_test,Y_test)
-#print(accuracy)
-#96.6%
-"""important"""
-#first data or image in the x_test array
-plt.imshow(X_test[0])
+# Visualizing the first image in the test set
+plt.imshow(X_test[0], cmap='gray')
 plt.show()
 
 print(Y_test[0])
 
-Y_predictions=model.predict(X_test)
+# Predicting the labels for the test set
+Y_predictions = model.predict(X_test)
 print(Y_predictions.shape)
 
-#the above line of code gives(10000,10)
-"""explaination: as we know we have 10 k images in testing data and y test is basically the the actual value ehich the model needs to predict on x test labels and also 10 represents digits from 0 to 9 """
-
+# Explanation: Since there are 10,000 images in the test set, and the model predicts 10 values (one for each digit 0-9)
 print(Y_predictions[0])
-label_prediction=numpy.argmax(Y_predictions[0])
-"""telling me the max value which is actually the value jo humme prediction k baad chaia"""
-print(label_prediction)
-# 7 is the output
 
+# Get the predicted label for the first image
+label_prediction = numpy.argmax(Y_predictions[0])  # Find the index of the maximum value
+print(label_prediction)  # 7 is the output
 
-#now here i am going to create the label values from the prediction probabilities similarly as done above but want to this for all input features
-label_pred_for_input_features=[numpy.argmax(i) for i in Y_predictions]
+# Create a list of predicted labels for all test images
+label_pred_for_input_features = [numpy.argmax(i) for i in Y_predictions]
 print(label_pred_for_input_features)
 
-#y_test are the actual label values and label_pred_for_input_features are the predicted ones
+# Y_test are the actual labels, and label_pred_for_input_features are the predicted ones
 
-"""making the confusion matrix"""
-conf_mat=confusion_matrix(Y_test,label_pred_for_input_features)
+# Creating the confusion matrix
+conf_mat = confusion_matrix(Y_test, label_pred_for_input_features)
 print(conf_mat)
 
+# Last part: Building a predictive model where we provide an image, and it predicts the value
 
-"""last part of the model in which i am going to make a predictive model or in other terms a model to which i will be providing the image and need to tell me that which calue it is"""
-
-#saving images in png
-
-save_dir="mnist_png"
-os.makedirs(save_dir,exist_ok=True)
+# Saving images as PNG files
+save_dir = "mnist_png"
+os.makedirs(save_dir, exist_ok=True)
 for i in range(len(X_train)):
     image = X_train[i]
     label = Y_train[i]
@@ -118,28 +111,25 @@ for i in range(len(X_train)):
     plt.imsave(file_name, image, cmap='gray')
 
 print("PNG images saved successfully.")
-"""so through the above snippet the size is 28X28 and also in grayscale so no need to that task"""
 
-""" doing the scaling as did it for training data but i have already done it """
+# The images are 28x28 pixels and grayscale, so no need to perform any additional tasks.
 
+# Scaling is already done for the training data, so there's no need to repeat that.
 
-
-#reshaped_img=numpy.reshape(input_img_resized,[1,28,28])#telling i am going to pwhy redict label for 1 image
-# Read the image
+# Read the image to be predicted
 image_to_be_predicted_path = input("Enter the path of the image to be predicted: ")
 image_to_be_predicted = cv2.imread(image_to_be_predicted_path, cv2.IMREAD_GRAYSCALE)
 
-
+# Resize the image to 28x28 pixels
 resized_image = cv2.resize(image_to_be_predicted, (28, 28))
-
 
 # Display the image
 cv2.imshow("Image to be Predicted", resized_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-scaled_img=resized_image/255
-
+# Scale the image to the same range as the training data
+scaled_img = resized_image / 255
 
 # Predict the label for the image
 input_prediction = model.predict(scaled_img.reshape(1, 28, 28))
